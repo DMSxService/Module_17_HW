@@ -3,7 +3,6 @@ from sqlalchemy import Column, ForeignKey, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 
 
-
 class Task(Base):
     __tablename__ = 'tasks'
     id = Column(Integer, primary_key=True, index=True)
@@ -17,5 +16,5 @@ class Task(Base):
 
 
 from sqlalchemy.schema import CreateTable
-from user import User
+
 print(CreateTable(Task.__table__))
