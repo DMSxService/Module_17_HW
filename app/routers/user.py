@@ -29,12 +29,13 @@ async def user_by_id(db: Annotated[Session, Depends(get_db)], user_id: int):
 
 @router.post("/create")
 async def create_user(db: Annotated[Session, Depends(get_db)], user_id: int, cr_user: CreateUser):
-    # user = db.scalars(select(User).where(User.id == user_id))
-    # if user:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_409_CONFLICT,
-    #         detail='User id already exists'
-    #     )
+    user = db.scalars(select(User).where(User.id == user_id))
+    if list(user):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail='User id already exists'
+        )
+
     db.execute(insert(User).values(
         id=user_id,
         username=cr_user.username,
