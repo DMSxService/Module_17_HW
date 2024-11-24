@@ -35,14 +35,17 @@ async def create_user(db: Annotated[Session, Depends(get_db)], user_id: int, cr_
             status_code=status.HTTP_409_CONFLICT,
             detail='User id already exists'
         )
+    try:
+        db.execute(insert(User).values(
+            id=user_id,
+            username=cr_user.username,
+            firstname=cr_user.firstname,
+            lastname=cr_user.lastname,
+            age=cr_user.age,
+            slug=slugify(cr_user.username)))
+    except:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='User id already exists')
 
-    db.execute(insert(User).values(
-        id=user_id,
-        username=cr_user.username,
-        firstname=cr_user.firstname,
-        lastname=cr_user.lastname,
-        age=cr_user.age,
-        slug=slugify(cr_user.username)))
     db.commit()
     return {
         'status_code': status.HTTP_201_CREATED,
