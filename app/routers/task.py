@@ -1,4 +1,12 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, status, HTTPException
+from sqlalchemy.orm import Session
+from sqlalchemy import insert, select, update, delete
+from slugify import slugify
+from typing import Annotated
+from app.backend.db_depends import get_db
+from app.models import User
+from app.schemas import CreateUser, UpdateUser
+
 
 router = APIRouter(prefix="/task", tags=["task"])
 
