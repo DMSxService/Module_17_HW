@@ -8,7 +8,6 @@ from app.models.task import Task
 from app.models.user import User
 from app.schemas import CreateTask, UpdateTask
 
-
 router = APIRouter(prefix="/task", tags=["task"])
 
 
@@ -20,8 +19,8 @@ async def all_tasks(db: Annotated[Session, Depends(get_db)]):
 
 @router.get("/task_id")
 async def task_by_id(db: Annotated[Session, Depends(get_db)], task_id: int):
-    task = db.scalars(select(Task).where(Task.id == task_id))
-    if not list(task):
+    task = db.scalar(select(Task).where(Task.id == task_id))
+    if task is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Task was not found')
@@ -30,8 +29,8 @@ async def task_by_id(db: Annotated[Session, Depends(get_db)], task_id: int):
 
 @router.post("/create")
 async def create_task(db: Annotated[Session, Depends(get_db)], user_id: int, cr_task: CreateTask):
-    user = db.scalars(select(User).where(User.id == user_id))
-    if not list(user):
+    user = db.scalar(select(User).where(User.id == user_id))
+    if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='User was not found')
@@ -41,22 +40,23 @@ async def create_task(db: Annotated[Session, Depends(get_db)], user_id: int, cr_
         last_element = tasks[-1]
         task_id = last_element.id + 1
     db.execute(insert(Task).values(
-            id=task_id,
-            title=cr_task.title,
-            content=cr_task.content,
-            priority=cr_task.priority,
-            user_id=user_id,
-            slug=slugify(cr_task.title)))
+        id=task_id,
+        title=cr_task.title,
+        content=cr_task.content,
+        priority=cr_task.priority,
+        user_id=user_id,
+        slug=slugify(cr_task.title)))
     db.commit()
     return {
         'status_code': status.HTTP_201_CREATED,
         'transaction': 'Successful'
     }
 
+
 @router.put("/update")
 async def update_task(db: Annotated[Session, Depends(get_db)], task_id: int, up_task: UpdateTask):
-    task = db.scalars(select(Task).where(Task.id == task_id))
-    if not list(task):
+    task = db.scalar(select(Task).where(Task.id == task_id))
+    if task is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Task was not found')
@@ -72,13 +72,14 @@ async def update_task(db: Annotated[Session, Depends(get_db)], task_id: int, up_
         'transaction': 'Task update is successful'
     }
 
+
 @router.delete("/delete")
 async def delete_task(db: Annotated[Session, Depends(get_db)], task_id: int):
-    task = db.scalars(select(Task).where(Task.id == task_id))
-    if not list(task):
+    task = db.scalar(select(Task).where(Task.id == task_id))
+    if task is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail='User was not found')
+            detail='Task was not found')
     db.execute(delete(Task).where(Task.id == task_id))
     db.commit()
     return {
